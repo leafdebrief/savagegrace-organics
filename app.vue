@@ -3,8 +3,8 @@
     filter,
     backgroundPosition: (mouseX * -100) + 'px ' + (mouseY * -100) + 'px'
   }">
-    <img src="/img/logo.svg" :alt="title" class="sg-logo" :style="{ transform }">
   </div>
+  <img src="/img/logo.svg" :alt="title" class="sg-logo" :style="{ transform }">
 </template>
 
 <script>
@@ -30,7 +30,9 @@ export default {
       return `grayscale(${grayscale}%)`;
     },
     transform() {
-      return `rotateY(${this.mouseX * 30}deg) rotateX(${this.mouseY * -30}deg) translateZ(100px)`;
+      const rotateY = this.mouseX * 30;
+      const rotateX = this.mouseY * -30;
+      return `rotateY(${rotateY}deg) rotateX(${rotateX}deg) translateZ(100px) translate(-50%, -50%)`;
     }
   },
   mounted() {}
@@ -67,7 +69,11 @@ export default {
   
 
   .sg-logo {
+    opacity: 0.8;
+    pointer-events: none;
     position: absolute;
+    top: 50%;
+    left: 50%;
     width: 50%;
     height: auto;
     max-width: 500px;
