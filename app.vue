@@ -1,42 +1,73 @@
 <template>
-  <div class="sg-background" @mousemove="onMouseMove" :style="{
-    filter,
-    backgroundPosition: (mouseX * -100) + 'px ' + (mouseY * -100) + 'px'
-  }">
+  <div 
+    class="sg-background" 
+    @mousemove="onMouseMove" 
+    :style="{
+      filter,
+      backgroundPosition: (mouseX * -100) + 'px ' + (mouseY * -100) + 'px'
+    }"
+  ></div>
+  <div 
+    :style="transform"
+  >
+    <img
+      src="/img/logo-background.svg" 
+      alt="" 
+      class="sg-logo sg-logo--background" 
+    >
+    <img
+      :alt="title" 
+      src="/img/logo-foreground.svg" 
+      class="sg-logo sg-logo--foreground" 
+    >
   </div>
-  <img src="/img/logo.svg" :alt="title" class="sg-logo" :style="{ transform }">
+  
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      title: 'Savage Grace Organics',
-      mouseX: 0,
-      mouseY: 0
-    };
-  },
-  methods: {
-    onMouseMove(e) {
-      this.mouseX = (e.clientX / window.innerWidth) - 0.5;
-      this.mouseY = (e.clientY / window.innerHeight) - 0.5;
+<script setup lang="ts">
+import { computed, onMounted, ref } from 'vue';
 
-      console.log(this.mouseX, this.mouseY);
-    }
-  },
-  computed: {
-    filter() {
-      const grayscale = Math.abs(this.mouseX * 100);
-      return `grayscale(${grayscale}%)`;
-    },
-    transform() {
-      const rotateY = this.mouseX * 30;
-      const rotateX = this.mouseY * -30;
-      return `rotateY(${rotateY}deg) rotateX(${rotateX}deg) translateZ(100px) translate(-50%, -50%)`;
-    }
-  },
-  mounted() {}
-};
+const title = ref('Savage Grace Organics');
+const mouseX = ref(0);
+const mouseY = ref(0);
+
+useHead({
+  title: title.value,
+  meta: [
+    { name: 'description', content: 'My amazing site.' }
+  ]
+});
+
+const filter = computed(() => {
+  const grayscale = Math.abs(mouseX.value * 100);
+  return `grayscale(${grayscale}%)`;
+});
+
+const transform = computed(() => {
+  const rotateY = Math.round(mouseX.value * 30);
+  const rotateX = Math.round(mouseY.value * -30);
+  return {
+    '--rotate-y': `${rotateY}deg`,
+    '--rotate-x': `${rotateX}deg`
+  };
+});
+
+onMounted(() => {
+  window.addEventListener('deviceorientation', onMouseMove.bind(this), true);
+})
+
+function onMouseMove(e) {
+  if (e.type === 'deviceorientation') {
+    mouseX.value = (e.gamma / 90) - 0.5;
+    mouseY.value = (e.beta / 90) - 0.5;
+    return;
+  }
+
+  mouseX.value = (e.clientX / window.innerWidth) - 0.5;
+  mouseY.value = (e.clientY / window.innerHeight) - 0.5;
+
+  console.log(mouseX.value, mouseY.value);
+}
 </script>
 
 <style lang="scss" scoped>
@@ -69,7 +100,6 @@ export default {
   
 
   .sg-logo {
-    opacity: 0.8;
     pointer-events: none;
     position: absolute;
     top: 50%;
@@ -79,5 +109,15 @@ export default {
     max-width: 500px;
     perspective: 2000px;
     perspective-origin: 50% 50%;
+    transform: rotateY(var(--rotate-y, 0deg)) rotateX(var(--rotate-x, 0deg)) translateZ(var(--translate-z, 100px)) translate(-50%, -50%);
+    transition: 0.1s;
+
+    &--background {
+      opacity: 0.8;
+    }
+
+    &--foreground {
+      --translate-z: 150px;
+    }
   }
 </style>
